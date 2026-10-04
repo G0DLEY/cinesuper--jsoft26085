@@ -4,7 +4,6 @@ insert into genres (name) values
   ('Action'), ('Drama'), ('Comedy'), ('Sci-Fi'), ('Thriller'), ('Biography');
 
 insert into movies (title, release_year, language, duration_min, description, poster_url, genre_id) values
-  -- Malayalam
   ('Drishyam', 2013, 'Malayalam', 160,
    'A cable operator goes to any length to protect his family after an accidental crime.',
    'https://placehold.co/300x450/7f1d1d/ffffff?text=Drishyam',
@@ -25,7 +24,6 @@ insert into movies (title, release_year, language, duration_min, description, po
    'Friends from Kochi race to rescue one of them trapped in the Guna Caves.',
    'https://placehold.co/300x450/422006/ffffff?text=Manjummel+Boys',
    (select id from genres where name = 'Thriller')),
-  -- Tamil
   ('Vikram', 2022, 'Tamil', 174,
    'A special agent investigates masked murders linked to a drug cartel.',
    'https://placehold.co/300x450/111827/ffffff?text=Vikram',
@@ -38,7 +36,6 @@ insert into movies (title, release_year, language, duration_min, description, po
    'A lawyer fights for justice for a tribal woman whose husband goes missing in custody.',
    'https://placehold.co/300x450/1e40af/ffffff?text=Jai+Bhim',
    (select id from genres where name = 'Drama')),
-  -- Christopher Nolan
   ('Memento', 2000, 'English', 113,
    'A man with short-term memory loss hunts his wife''s killer using notes and tattoos.',
    'https://placehold.co/300x450/374151/ffffff?text=Memento',

@@ -2,14 +2,16 @@
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // 2. Page elements
-const grid        = document.getElementById("movieGrid");
-const statusEl    = document.getElementById("status");
-const searchInput = document.getElementById("search");
-const genreFilter = document.getElementById("genreFilter");
-const modal       = document.getElementById("modal");
-const movieDetail = document.getElementById("movieDetail");
-const reviewList  = document.getElementById("reviewList");
-const reviewForm  = document.getElementById("reviewForm");
+const grid           = document.getElementById("movieGrid");
+const statusEl       = document.getElementById("status");
+const searchInput    = document.getElementById("search");
+const genreFilter    = document.getElementById("genreFilter");
+const languageFilter = document.getElementById("languageFilter");
+const sortSelect     = document.getElementById("sortSelect");
+const modal          = document.getElementById("modal");
+const movieDetail    = document.getElementById("movieDetail");
+const reviewList     = document.getElementById("reviewList");
+const reviewForm     = document.getElementById("reviewForm");
 
 let movies = [];
 let ratingsMap = {};
@@ -42,6 +44,18 @@ async function loadGenres() {
   });
 }
 
+// 3b. SELECT DISTINCT language FROM movies (language filter)
+async function loadLanguages() {
+  const { data, error } = await db.from("movies").select("language");
+  if (error) return showError(error);
+  [...new Set(data.map((x) => x.language))].sort().forEach((lang) => {
+    const opt = document.createElement("option");
+    opt.value = lang;
+    opt.textContent = lang;
+    languageFilter.appendChild(opt);
+  });
+}
+
 // 4. SELECT * FROM movie_ratings (the view)
 async function loadRatings() {
   const { data, error } = await db.from("movie_ratings").select("id, avg_rating, review_count");
@@ -50,22 +64,35 @@ async function loadRatings() {
   data.forEach((r) => (ratingsMap[r.id] = r));
 }
 
-// 5. SELECT movies JOIN genres, with search and filter
+// 5. SELECT movies JOIN genres, with search, filters and sorting
 async function loadMovies() {
   statusEl.textContent = "Loading movies...";
 
   let query = db
     .from("movies")
-    .select("id, title, release_year, language, duration_min, description, poster_url, genres(name)")
-    .order("release_year", { ascending: false });
+    .select("id, title, release_year, language, duration_min, description, poster_url, director, genres(name)");
 
-  const search = searchInput.value.trim();
+  const search  = searchInput.value.trim();
   const genreId = genreFilter.value;
+  const lang    = languageFilter.value;
   if (search)  query = query.ilike("title", `%${search}%`);
   if (genreId) query = query.eq("genre_id", genreId);
+  if (lang)    query = query.eq("language", lang);
 
   const { data, error } = await query;
   if (error) return showError(error);
+
+  // Sort in JavaScript (Top Rated uses the movie_ratings view)
+  const mode = sortSelect.value;
+  data.sort((a, b) => {
+    if (mode === "oldest") return a.release_year - b.release_year;
+    if (mode === "top") {
+      const ra = ratingsMap[a.id]?.avg_rating ?? -1;
+      const rb = ratingsMap[b.id]?.avg_rating ?? -1;
+      return rb - ra || b.release_year - a.release_year;
+    }
+    return b.release_year - a.release_year; // newest
+  });
 
   movies = data;
   statusEl.textContent = data.length ? `${data.length} movie(s) found` : "No movies found 😕";
@@ -89,7 +116,7 @@ function movieCard(m) {
     </div>`;
 }
 
-// 6. Movie detail popup
+// 6. Movie detail popup (shows the new director column)
 async function openMovie(id) {
   const m = movies.find((x) => x.id === id);
   if (!m) return;
@@ -97,6 +124,7 @@ async function openMovie(id) {
   movieDetail.innerHTML = `
     <h2>${escapeHtml(m.title)}</h2>
     <p class="meta">${m.release_year} · ${escapeHtml(m.language)} · ${escapeHtml(m.genres?.name)} · ${m.duration_min} min</p>
+    <p class="director">🎬 Director: ${escapeHtml(m.director || "Unknown")}</p>
     <p>${escapeHtml(m.description)}</p>`;
   modal.classList.remove("hidden");
   await loadReviews(id);
@@ -150,17 +178,20 @@ document.getElementById("closeModal").addEventListener("click", () => modal.clas
 modal.addEventListener("click", (e) => { if (e.target === modal) modal.classList.add("hidden"); });
 document.addEventListener("keydown", (e) => { if (e.key === "Escape") modal.classList.add("hidden"); });
 
-// 10. Search (waits until typing stops) and genre filter
+// 10. Search (waits until typing stops), filters and sort
 let typingTimer;
 searchInput.addEventListener("input", () => {
   clearTimeout(typingTimer);
   typingTimer = setTimeout(loadMovies, 300);
 });
 genreFilter.addEventListener("change", loadMovies);
+languageFilter.addEventListener("change", loadMovies);
+sortSelect.addEventListener("change", loadMovies);
 
 // 11. Start
 async function init() {
   await loadGenres();
+  await loadLanguages();
   await loadRatings();
   await loadMovies();
 }

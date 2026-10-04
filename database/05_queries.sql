@@ -1,3 +1,5 @@
+-- ===== PART A =====
+
 -- Q1. Movies with genre name (INNER JOIN)
 select m.title, m.release_year, g.name as genre
 from movies m join genres g on g.id = m.genre_id;
@@ -30,3 +32,27 @@ where duration_min = (select max(duration_min) from movies);
 -- Q8. Update a description
 update movies set description = 'An epic sci-fi journey through space and time.'
 where title = 'Interstellar';
+
+-- ===== PART B (my own queries) =====
+
+-- B1. All reviews with the movie title (JOIN)
+select m.title, r.reviewer_name, r.rating, r.comment
+from reviews r join movies m on m.id = r.movie_id
+order by m.title;
+
+-- B2. Number of movies per language
+select language, count(*) as total_movies
+from movies group by language order by total_movies desc;
+
+-- B3. Newest movie in the database
+select title, release_year from movies
+where release_year = (select max(release_year) from movies);
+
+-- B4. Movies whose title starts with M (LIKE)
+select title from movies where title like 'M%';
+
+-- B5. Delete one review (screenshot the table before and after)
+select * from reviews;                       -- BEFORE
+delete from reviews
+where id = (select min(id) from reviews);
+select * from reviews;                       -- AFTER

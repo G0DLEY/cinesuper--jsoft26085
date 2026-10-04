@@ -1,9 +1,8 @@
-# cinesuper--jsoft26085
 # 🎬 CineSuper — Mini OTT Movie Database
 
 **Live Demo:** https://YOUR-USERNAME.github.io/cinesuper-YOUR-JSOFT-ID/
 
-**Student:** YOUR NAME | **JSOFT ID:** YOUR JSOFT ID
+**Student:** Alan Godley John | **JSOFT ID:** YOUR JSOFT ID
 **Institution:** Jain School of Future Technology
 **Course:** Database Management Systems | **Faculty:** Sathish Kumar M
 
@@ -14,7 +13,7 @@
 
 ## Database
 - genres (id, name)
-- movies (id, title, release_year, language, duration_min, description, poster_url, genre_id → genres)
+- movies (id, title, release_year, language, duration_min, description, poster_url, genre_id → genres, director)
 - reviews (id, movie_id → movies, reviewer_name, rating 1–5, comment, created_at)
 - View: movie_ratings (average rating per movie)
 - SQL scripts: see the `database/` folder
@@ -26,6 +25,7 @@
 - Row Level Security enabled
 
 ## My Personalisation
-- New movies added: …
-- New column: …
-- Extra feature: …
+- New movies added: Bramayugam, Tumbbad (new genre: Horror), Ratsasan, Kumbalangi Nights, Lucifer
+- New column: `director` (shown in the movie popup)
+- Extra feature: Language filter and Sort by Newest / Oldest / Top Rated
+- New theme colour: teal (#14b8a6) replacing the original red
